@@ -1,17 +1,16 @@
-# stm32f030f4-blinker
+# stm32f030f4-adc-uart
 
-This is a kick-start project to work with STM32F0 controllers.
-It uses arm-linux-gnueabi-gcc toolchain for compilation and java tool "BootStm32" for flashing.
+This project uses STM32F030 controller to read temperature from LM335 and send it via UART. It also measures internal voltage reference (bandgap) with another channel of ADC to compute current voltage scale and then apply it to value got from temperature sensor:
 
-Note that not all header files are needed for this project, but they are added for reference.
+            3300 * adc_temp * adc_int_ref
+    Vadc = -------------------------------
+                4096 * adc_int
+    
+- `adc_temp` - value from ADC-channel attached to external temperature sensor
+- `adc_int` - value from ADC-channel attached to internal voltage reference
+- `adc_int_ref` - factory "default" value for internal voltage reference, taken from system memory (for `3300` mV)
 
 ###Wiring
-
-VDDA should be connected to power, otherwise chip is in reset state. If package has VSSA - it
-also should be connected (to GND).
-
-To enter boot mode it is sufficient to connect BOOT0 to power during reset. Do not get confused
-with absent BOOT1 pin - it is in proper state internally.
 
 For TSSOP-20 package
 
@@ -22,4 +21,7 @@ For TSSOP-20 package
 - pin 4  (RESET) to GND, temporarily
 - pin 8  (USART1_TX) to RX of the FTDI-cable
 - pin 9  (USART1_RX) to TX of the FTDI-cable
+- pin 6  (PA0) to LED
+- pin 11 (PA5) to plus of LM335 (as ADC input)
 
+LM335 has its minus on GND and its plus tied with 330 Ohm resistor to VDD (+3.3). External ceramic 1uF capacitor between VDD and GND seems to significantly improve ADC values stability.
